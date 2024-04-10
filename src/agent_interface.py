@@ -2,6 +2,8 @@ import subprocess
 import os
 import shutil
 import importlib
+from azure.ai.textanalytics import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
 
 class AutonomousAgent:
     """
@@ -10,15 +12,20 @@ class AutonomousAgent:
     and interacting with other agents or human inputs.
     """
 
-    def __init__(self, name, toolset):
+    def __init__(self, name, toolset, azure_endpoint, azure_key):
         """
         Initializes a new instance of the AutonomousAgent.
 
         :param name: A unique name for the agent.
         :param toolset: A collection of tools the agent can use to perform tasks.
+        :param azure_endpoint: The endpoint for the Azure OpenAI service.
+        :param azure_key: The key for authenticating with the Azure OpenAI service.
         """
         self.name = name
         self.toolset = toolset
+        self.azure_endpoint = azure_endpoint
+        self.azure_key = azure_key
+        self.azure_client = TextAnalyticsClient(endpoint=azure_endpoint, credential=AzureKeyCredential(azure_key))
 
     def perform_task(self, task, parameters):
         """
@@ -81,8 +88,19 @@ class AutonomousAgent:
                 print(f"An error occurred while running {tool_name}: {e}")
                 return e.output
 
+    def analyze_text(self, text):
+        """
+        Analyzes the given text using Azure OpenAI LLM.
+
+        :param text: The text to analyze.
+        :return: The analysis results.
+        """
+        response = self.azure_client.analyze_sentiment(documents=[text])
+        return response if response.is_error else response[0].sentiment
+
 # Example usage:
-# agent = AutonomousAgent(name="DevAgent", toolset=["autogen", "pytest", "docker"])
+# agent = AutonomousAgent(name="DevAgent", toolset=["autogen", "pytest", "docker"], azure_endpoint="https://inferenceendpointeastus.openai.azure.com/", azure_key="66ee2a3118184096a18e196829539064")
 # result = agent.perform_task("generate_code", {"template": "api_service"})
 # response = agent.communicate("Are you ready?", other_agent=AutonomousAgent(name="OtherAgent", toolset=[]))
 # tool_output = agent.run_tool("autogen", ["--config", "autogen.json"])
+# sentiment = agent.analyze_text("This is a sample text for sentiment analysis.")
