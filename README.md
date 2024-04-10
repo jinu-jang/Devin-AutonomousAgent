@@ -18,10 +18,11 @@ The core of this project is the `AutonomousAgent` class, which defines what an a
 To set up the project, follow these steps:
 
 1. Clone the repository to your local machine.
-2. Install the required dependencies using the command:
+2. Install the required dependencies. With the introduction of the `pyproject.toml` file, you can now set up the environment using the following command:
    ```
-   pip install -r requirements.txt
+   python -m pip install -e .
    ```
+   This will install the project in editable mode along with the dependencies specified in `pyproject.toml`.
 3. To install the 'autogen' tool, run:
    ```
    pip install pyautogen
